@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# SQLite (не попадает в образ — хранится в volume)
+*.db
+*.db-shm
+*.db-wal
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs (не нужны в образе)
+*.md
+CONNECT_BACKEND.md

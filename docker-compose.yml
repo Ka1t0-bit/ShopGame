@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  # ── Backend (FastAPI + SQLite) ─────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: shopgame-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: sqlite:////data/shop.db
+      # Разрешаем запросы с фронтенда (в браузере всегда localhost:3000)
+      CORS_ORIGINS: "http://localhost:3000,http://frontend:3000"
+    volumes:
+      # Персистентное хранилище БД
+      - db_data:/data
+    ports:
+      - "8000:8000"
+    networks:
+      - shopgame-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ── Frontend (Next.js) ─────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        # Во время сборки образа — API недоступен по имени сервиса из браузера,
+        # поэтому используем localhost:8000 (браузер пользователя)
+        NEXT_PUBLIC_API_URL: "http://localhost:8000"
+    container_name: shopgame-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - shopgame-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  db_data:
+    name: shopgame-db-data
+
+networks:
+  shopgame-net:
+    name: shopgame-network
+    driver: bridge

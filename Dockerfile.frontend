@@ -1,0 +1,38 @@
+# ── Frontend Dockerfile ─────────────────────────────────────────────────────────
+FROM node:20-alpine AS deps
+
+WORKDIR /app
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci --frozen-lockfile
+
+# ── Build stage ─────────────────────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY frontend/ .
+
+# API URL для сборки в Docker: бэкенд доступен по имени сервиса "backend"
+# В браузере запросы идут на хост:3000 → бэкенд на хост:8000 (proxy)
+ARG NEXT_PUBLIC_API_URL=http://localhost:8000
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
+RUN npm run build
+
+# ── Runtime stage ────────────────────────────────────────────────────────────────
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+# Только нужные файлы
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
+  CMD wget -qO- http://localhost:3000 || exit 1
+
+CMD ["node", "server.js"]
