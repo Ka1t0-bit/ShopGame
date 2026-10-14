@@ -43,3 +43,6 @@ AGENTS.md
 CLAUDE.md
 frontend/AGENTS.md
 frontend/CLAUDE.md
+
+# ── Internal dev docs (not for the repo) ────────────────────────────────────────
+CONNECT_BACKEND.md
