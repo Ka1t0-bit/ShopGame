@@ -318,4 +318,4 @@ curl -X POST "http://localhost:8000/products/?name=Cyberpunk+2077&description=RP
 
 ## 📄 Лицензия
 
-MIT © 2024 GameVault
+MIT © 2026 GameVault
