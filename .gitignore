@@ -39,3 +39,7 @@ Thumbs.db
 # ── Agents / AI Tools ────────────────────────────────────────────────────────────
 .agents/
 .gemini/
+AGENTS.md
+CLAUDE.md
+frontend/AGENTS.md
+frontend/CLAUDE.md
